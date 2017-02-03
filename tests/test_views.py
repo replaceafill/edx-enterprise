@@ -96,6 +96,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             client.get(self.url)
         assert str(excinfo.value) == 'Methods in the Open edX platform necessary for this view are not available.'
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -112,6 +113,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_social,
             mock_quarantine,
             mock_lift,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test that we have the appropriate context when rendering the form.
@@ -122,6 +124,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         response = client.get(self.url)
         assert response.status_code == 404
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -138,6 +141,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_social,
             mock_quarantine,
             mock_lift,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test that we have the appropriate context when rendering the form.
@@ -170,6 +174,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         for key, value in expected_context.items():
             assert response.context[key] == value  # pylint: disable=no-member
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -186,6 +191,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_social,
             mock_quarantine,
             mock_lift,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test that we have correct context for an optional form rendering.
@@ -218,6 +224,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         for key, value in expected_context.items():
             assert response.context[key] == value  # pylint: disable=no-member
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.configuration_helpers')
@@ -236,6 +243,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_config,
             mock_lift,
             mock_quarantine,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test that when there's no customer for the request, POST gives a 404.
@@ -245,6 +253,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         response = client.post(self.url)
         assert response.status_code == 404
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.configuration_helpers')
@@ -263,6 +272,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_config,
             mock_lift,
             mock_quarantine,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test an enforecd request without consent.
@@ -274,7 +284,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         with raises(NoReverseMatch) as excinfo:
             client = Client()
             session = client.session
-            session['partial_pipeline'] = True
+            session['partial_pipeline_token'] = True
             session.save()
             client.post(self.url)
         expected = (
@@ -286,6 +296,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         assert EnterpriseCustomerUser.objects.all().count() == 1
         assert not UserDataSharingConsentAudit.objects.all()[0].enabled
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.configuration_helpers')
@@ -304,6 +315,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_config,
             mock_lift,
             mock_quarantine,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test an unenforced request
@@ -313,16 +325,15 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         mock_get_ec2.return_value = customer
         mock_get_rsa.return_value = mock.MagicMock(user=UserFactory())
         mock_url.return_value = '/'
+        mock_partial.return_value = {'backend': 'fake_backend'}
         client = Client()
-        session = client.session
-        session['partial_pipeline'] = {'backend': 'fake_backend'}
-        session.save()
         response = client.post(self.url)
         assert UserDataSharingConsentAudit.objects.all().count() == 1
         assert EnterpriseCustomerUser.objects.all().count() == 1
         assert not UserDataSharingConsentAudit.objects.all()[0].enabled
         assert response.status_code == 302
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.quarantine_session')
     @mock.patch('enterprise.views.lift_quarantine')
     @mock.patch('enterprise.views.configuration_helpers')
@@ -341,6 +352,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
             mock_config,
             mock_lift,
             mock_quarantine,
+            mock_partial,
     ):  # pylint: disable=unused-argument
         """
         Test an enforced request with consent and rendering patched in.
@@ -351,9 +363,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         mock_get_rsa.return_value = mock.MagicMock(user=UserFactory())
         mock_url.return_value = '/'
         client = Client()
-        session = client.session
-        session['partial_pipeline'] = {'backend': 'fake_backend'}
-        session.save()
+        mock_partial.return_value = {'backend': 'fake_backend'}
         response = client.post(self.url, {'data_sharing_consent': True})
         assert UserDataSharingConsentAudit.objects.all().count() == 1
         assert EnterpriseCustomerUser.objects.all().count() == 1
@@ -366,6 +376,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         """
         assert self.client.login(username=self.user.username, password="QWERTY")
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -427,6 +438,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         }.items():
             assert response.context[key] == value  # pylint:disable=no-member
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -467,6 +479,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         )
         assert response.status_code == 404
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -506,6 +519,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         )
         assert response.status_code == 404
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -548,6 +562,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         )
         assert response.status_code == 404
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -588,6 +603,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         enrollment.refresh_from_db()
         assert enrollment.consent_granted is True
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
@@ -626,6 +642,7 @@ class TestGrantDataSharingPermissions(unittest.TestCase):
         enrollment.refresh_from_db()
         assert enrollment.consent_granted is False
 
+    @mock.patch('enterprise.views.get_pipeline_partial')
     @mock.patch('enterprise.views.get_complete_url')
     @mock.patch('enterprise.tpa_pipeline.get_enterprise_customer_for_request')
     @mock.patch('enterprise.views.get_real_social_auth_object')
