@@ -272,6 +272,37 @@ class EnterpriseCustomerUser(TimeStampedModel):
             return self.user.email
         return None
 
+    @property
+    def entitlements(self):
+        """
+        Return entitlement ids available to the learner.
+
+        Returns an empty list if enterprise customer requires data sharing consent and learner does not agree.
+
+        Returns:
+            (list): A list of entitlements that learner can avail.
+        """
+        # Check if Enterprise Customer requires data sharing consent and store the boolean result
+        # pylint: disable=invalid-name
+        enterprise_customer_requires_consent = \
+            self.enterprise_customer.enforces_data_sharing_consent(EnterpriseCustomer.AT_LOGIN) or \
+            self.enterprise_customer.enforces_data_sharing_consent(EnterpriseCustomer.AT_ENROLLMENT)
+
+        # Check if Enterprise Learner consents to data sharing and store the boolean result
+        learner_consent_state = self.data_sharing_consent.first()
+        learner_consent_enabled = learner_consent_state and learner_consent_state.enabled
+
+        # return empty list if enterprise customer requires data sharing consent
+        # and learner has not provided consent.
+        if enterprise_customer_requires_consent and not learner_consent_enabled:
+            return []
+
+        # pylint: disable=invalid-name
+        enterprise_customer_entitlements = self.enterprise_customer.enterprise_customer_entitlements.all()
+        return [
+            entitlement.entitlement_id for entitlement in enterprise_customer_entitlements
+        ]
+
     def __str__(self):
         """
         Return human-readable string representation.
