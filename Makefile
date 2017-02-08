@@ -54,10 +54,12 @@ upgrade: ## update the requirements/*.txt files with the latest packages satisfy
 	pip-compile --upgrade -o requirements/base.txt requirements/base.in
 	pip-compile --upgrade -o requirements/dev.txt requirements/dev.in requirements/quality.in
 	pip-compile --upgrade -o requirements/doc.txt requirements/base.in requirements/doc.in
-	pip-compile --upgrade -o requirements/quality.txt requirements/quality.in
+	pip-compile --upgrade -o requirements/quality.txt requirements/conflict/django1_10.in requirements/quality.in
 	pip-compile --upgrade -o requirements/test.txt requirements/base.in requirements/test.in
 	pip-compile --upgrade -o requirements/travis.txt requirements/travis.in
 	pip-compile --upgrade -o requirements/js_test.txt requirements/js_test.in
+	pip-compile --upgrade -o requirements/conflict/django1_09.txt requirements/conflict/django1_09.in
+	pip-compile --upgrade -o requirements/conflict/django1_10.txt requirements/conflict/django1_10.in
 	# Let tox control the Django version for tests
 	sed '/Django==/d' requirements/test.txt > requirements/test.tmp
 	mv requirements/test.tmp requirements/test.txt
@@ -80,7 +82,7 @@ jshint: ## run Javascript linting
 
 requirements: ## install development environment requirements
 	pip install -qr requirements/dev.txt --exists-action w
-	pip-sync requirements/base.txt requirements/dev.txt requirements/private.* requirements/test.txt
+	pip-sync requirements/base.txt requirements/dev.txt requirements/private.* requirements/test.txt requirements/conflict/django1_10.txt
 
 test: clean ## run tests in the current virtualenv
 	py.test

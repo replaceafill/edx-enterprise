@@ -9,15 +9,9 @@ cookies==2.2.1            # via responses
 coverage==4.3.4           # via pytest-cov
 ddt==1.1.1
 django-extensions==1.7.6
-django-filter==1.0.1
 django-model-utils==2.6.1
 django-object-actions==0.9.0
 django-simple-history==1.8.2
-djangorestframework-jwt==1.9.0  # via edx-drf-extensions
-djangorestframework-oauth==1.1.0
-djangorestframework==3.5.3
-edx-django-oauth2-provider==1.1.4
-edx-drf-extensions==1.2.2
 edx-rest-api-client==1.7.1
 factory-boy==2.8.1
 Faker==0.7.7              # via factory-boy
@@ -30,16 +24,15 @@ packaging==16.8           # via setuptools
 pbr==1.10.0               # via mock
 Pillow==4.0.0
 py==1.4.32                # via pytest, pytest-catchlog
-PyJWT==1.4.2              # via djangorestframework-jwt, edx-rest-api-client
+PyJWT==1.4.2              # via edx-rest-api-client
 pyparsing==2.1.10         # via packaging
 pytest-catchlog==1.2.2
 pytest-cov==2.4.0
 pytest-django==3.1.2
 pytest==3.0.6             # via pytest-catchlog, pytest-cov, pytest-django
-python-dateutil==2.6.0    # via edx-drf-extensions, faker, freezegun
-requests==2.13.0          # via edx-drf-extensions, responses, slumber
+python-dateutil==2.6.0    # via faker, freezegun
+requests==2.13.0          # via responses, slumber
 responses==0.5.1
-shortuuid==0.4.3          # via edx-django-oauth2-provider
 six==1.10.0               # via django-extensions, faker, freezegun, mock, packaging, python-dateutil, responses, setuptools
 slumber==0.7.1            # via edx-rest-api-client
 unicodecsv==0.14.1

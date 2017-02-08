@@ -1,0 +1,7 @@
+Django>=1.8,<1.9
+djangorestframework>=3.2.3,<3.3.0
+django-filter>=0.11.0,<1.0.0
+
+djangorestframework-oauth               # For enterprise REST API endpoint
+edx-django-oauth2-provider              # edx Django OAuth2 provider
+edx-drf-extensions                      # edX extensions to django rest framework
