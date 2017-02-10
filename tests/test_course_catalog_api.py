@@ -117,7 +117,7 @@ class TestCourseCatalogApi(unittest.TestCase):
     def test_get_all_catalogs_empty_response(self, response):
         self.get_data_mock.return_value = response
 
-        assert self.api.get_all_catalogs() == {}
+        assert self.api.get_all_catalogs() == []
 
     @ddt.data(
         "course-v1:JediAcademy+AppliedTelekinesis+T1",

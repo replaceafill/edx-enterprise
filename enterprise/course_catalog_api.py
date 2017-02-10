@@ -62,7 +62,7 @@ class CourseCatalogApiClient(object):
         Returns:
             list: List of catalogs available for the user.
         """
-        return self._load_data('catalogs')
+        return self._load_data('catalogs', default=[])
 
     def get_course_run(self, course_run_id):
         """
