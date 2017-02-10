@@ -319,7 +319,7 @@ class EnterpriseCustomerManageLearnersView(View):
         course_details = CourseCatalogApiClient(request.user).get_course_run(course_id)
 
         if not course_details:
-            logging.warn(
+            logging.warning(
                 _(
                     "Course details were not found for course key {}. "
                     "Proceeding with enrollment, but notifications won't be sent"
