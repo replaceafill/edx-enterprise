@@ -321,7 +321,7 @@ class EnterpriseCustomerManageLearnersView(View):
         if not course_details:
             logging.warning(
                 _(
-                    "Course details were not found for course key {}. "
+                    "Course details were not found for course key {} - Course Catalog API returned nothing. "
                     "Proceeding with enrollment, but notifications won't be sent"
                 ).format(course_id)
             )
